@@ -36,6 +36,7 @@ public class Command {
         DELETE("DELETE"),
         DELETE_ALL("DELETE ALL");
 
+
         private final String name;
 
         Type(String name) {
