@@ -20,7 +20,7 @@ public class DatabaseRunner {
     private static final String SQL_READ_ALL
             = "SELECT * FROM TODOLIST;";
     private static final String SQL_DELETE
-            = "DELETE FROM  TO DO LIST WHERE NAME = ?;";
+            = "DELETE FROM  TODOLIST WHERE NAME = ?;";
     private static final String SQL_DELETE_ALL = "DELETE FROM TODOLIST;";
 
     private final Map<Command.Type, Consumer<Command>> EXECUTION_MAP;
@@ -32,6 +32,7 @@ public class DatabaseRunner {
                 Command.Type.UPDATE, this::runEdit,
                 Command.Type.READ, this::runRead,
                 Command.Type.READ_ALL, this::runReadAll,
+                Command.Type.DELETE, this::runDelete,
                 Command.Type.DELETE_ALL, this::runDeleteAll
         );
     }
@@ -110,7 +111,23 @@ public class DatabaseRunner {
             System.err.printf("[%s] DATA ERROR. Message: [%s]%n",command.getType(), e.getMessage());
         }
     }
+    private void runDelete(final Command command){
+        //metoda kasująca wszystkie wpisy z bazy danych
+        if(!Command.Type.DELETE.equals(command.getType())){
+            throw new IllegalArgumentException(command.getType().getName());
+        }
+        try(
+                Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+                PreparedStatement statement = connection.prepareStatement(SQL_DELETE)
+        ){
+            statement.setString(1, command.getToDoItem().getName());
+            int count = statement.executeUpdate();
+            System.out.printf("run [%s] succesfully, deleted [%s]%n", command.getType(), count);
+        }catch (SQLException e){
+            System.err.printf("[%s] DATA ERROR. Message: [%s]%n",command.getType(), e.getMessage());
+        }
 
+    }
     private void runRead(final Command command){
         if(!Command.Type.READ.equals(command.getType())){
             throw new IllegalArgumentException(command.getType().getName());
