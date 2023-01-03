@@ -10,6 +10,9 @@ create table TODOLIST(
 	PRIORITY INT NOT NULL
 );
 3. w klasie DatabaseRunner w polu USERNAME należy wpisać podaną przy tworzeniu bazy danych nazwe użytkownika
+
 4. w klasie DatabaseRunner w polu PASSWORD należy wpisać podane przy tworzeniu bazy danych nazwe hasło
+
 5. uruchomić metodę main z klasy ScannerRunner
+
 W projekcie użyłem technologię takie jak programowanie funkcyjne, programowanie obiektowe, jdbc, bazy danych postgreSql, Sql
