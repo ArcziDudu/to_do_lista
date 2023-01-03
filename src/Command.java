@@ -7,9 +7,22 @@ public class Command {
 
     private final ToDoItem toDoItem;
 
-    public Command(Type type, ToDoItem toDoItem) {
+    private final ToDoItem.Field sortBy;
+    private final SortDir sortDir;
+
+    public Command(Type type, ToDoItem toDoItem, ToDoItem.Field sortBy, SortDir sortDir) {
         this.type = type;
         this.toDoItem = toDoItem;
+        this.sortBy = sortBy;
+        this.sortDir = sortDir;
+    }
+
+    public ToDoItem.Field getSortBy() {
+        return sortBy;
+    }
+
+    public SortDir getSortDir() {
+        return sortDir;
     }
 
     public Type getType() {
@@ -33,6 +46,7 @@ public class Command {
         UPDATE("UPDATE"),
         READ("READ"),
         READ_ALL("READ ALL"),
+        READ_GROUPED("READ GROUPED"),
         DELETE("DELETE"),
         DELETE_ALL("DELETE ALL");
 
@@ -61,5 +75,9 @@ public class Command {
                     .map(Type::getName)
                     .collect(Collectors.toList());
         }
+    }
+    public enum SortDir{
+        ASC,
+        DESC
     }
 }

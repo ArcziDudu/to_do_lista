@@ -1,8 +1,5 @@
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class DatabaseRunner {
@@ -18,7 +15,9 @@ public class DatabaseRunner {
     private final static String SQL_READ_WHERE
             = "SELECT * FROM TODOLIST WHERE NAME = ?;";
     private static final String SQL_READ_ALL
-            = "SELECT * FROM TODOLIST;";
+            = "SELECT * FROM TODOLIST ORDER BY ?1 ?2;";
+    private static final String SQL_READ_GROUPED
+            = "select DATE(deadline) as DATE, ARRAY_AGG(name) as TASKS from todolist group by DATE(deadline)";
     private static final String SQL_DELETE
             = "DELETE FROM  TODOLIST WHERE NAME = ?;";
     private static final String SQL_DELETE_ALL = "DELETE FROM TODOLIST;";
@@ -32,6 +31,7 @@ public class DatabaseRunner {
                 Command.Type.UPDATE, this::runEdit,
                 Command.Type.READ, this::runRead,
                 Command.Type.READ_ALL, this::runReadAll,
+                Command.Type.READ_GROUPED, this::runGroupeddAll,
                 Command.Type.DELETE, this::runDelete,
                 Command.Type.DELETE_ALL, this::runDeleteAll
         );
@@ -153,18 +153,47 @@ public class DatabaseRunner {
         }
         try(
                 Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(SQL_READ_ALL)
+                PreparedStatement statement = connection.prepareStatement(SQL_READ_ALL
+                        .replace("?1",command.getSortBy().name())
+                        .replace("?2",command.getSortDir().name()))
         ){
             try(ResultSet resultSet = statement.executeQuery()){
                 List<ToDoItem> readItems = mapToDoItem(resultSet);
                 print(readItems);
-                System.out.printf("run [%s] succesfully, read [%s]%n", command.getType(), readItems.size());
+                System.out.printf("run [%s] succesfully, read [%s] rows%n", command.getType(), readItems.size());
             }
         }catch (SQLException e){
             System.err.printf("[%s] ERROR. Message: [%s]%n",command.getType(), e.getMessage());
         }
 
     }
+    private void runGroupeddAll(final Command command){
+        if(!Command.Type.READ_GROUPED.equals(command.getType())){
+            throw new IllegalArgumentException(command.getType().getName());
+        }
+        try(
+                Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+                PreparedStatement statement = connection.prepareStatement(SQL_READ_GROUPED)
+        ){
+            try(ResultSet resultSet = statement.executeQuery()){
+             var grouped = mapToGrouped(resultSet);
+                print(grouped);
+                System.out.printf("run [%s] succesfully, read [%s] rows%n", command.getType(), grouped.size());
+            }
+        }catch (SQLException e){
+            System.err.printf("[%s] ERROR. Message: [%s]%n",command.getType(), e.getMessage());
+        }
+
+    }
+
+    private Map<String, String> mapToGrouped(ResultSet resultSet) throws SQLException {
+        Map<String, String> result = new HashMap<>();
+        while (resultSet.next()){
+            result.put(resultSet.getString("DATE"), resultSet.getString("TASKS"));
+        }
+        return result;
+    }
+
     private List<ToDoItem> mapToDoItem(ResultSet resultSet) throws SQLException {
         List<ToDoItem> result = new ArrayList<>();
         while(resultSet.next()){
@@ -193,5 +222,14 @@ public class DatabaseRunner {
                 entry.getDescription(),
                 entry.getDeadLine(),
                 entry.getPriority()));
+    }
+
+    private void print(Map<String, String>  items){
+        System.out.println("READ GROUPED");
+        String schema = "%-25s%-25s%n";
+        System.out.printf(schema, "DATE", "TASKS");
+        for (var stringStringEntry : items.entrySet()) {
+            System.out.printf(schema, stringStringEntry.getKey(), stringStringEntry.getValue());
+        }
     }
 }
