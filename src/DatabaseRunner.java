@@ -4,8 +4,8 @@ import java.util.function.Consumer;
 
 public class DatabaseRunner {
     private static final String URL = "jdbc:postgresql://localhost:5432/toDoList";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "anakonda123";
+    private static final String USERNAME = "";
+    private static final String PASSWORD = "";
 
     private static final String SQL_INSERT =
             "INSERT INTO TODOLIST (NAME, DESCRIPTION, DEADLINE, PRIORITY) VALUES(?,?,?,?)";
