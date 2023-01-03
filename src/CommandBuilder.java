@@ -35,6 +35,5 @@ public class CommandBuilder {
         Optional.ofNullable(parametersMap.get(ToDoItem.Field.PRIORITY.name()))
                 .ifPresent(priority -> toDoItem.setPriority(Integer.valueOf(priority)));
         return toDoItem;
-
     }
 }

@@ -4,6 +4,7 @@ import java.util.Optional;
 public class Main {
     public static void main(String[] args) {
         List<String> stringCommands = List.of(
+                "DELETE ALL;",
                 "CREATE;NAME=TASK1;DESCRIPTION=SOME DESCRIPTION1;DEADLINE=11.02.2021 20:10;PRIORITY=0",
                 "CREATE;NAME=TASK2;DESCRIPTION=SOME DESCRIPTION2;DEADLINE=12.02.2021 20:10;PRIORITY=1",
                 "CREATE;NAME=TASK3;DESCRIPTION=SOME DESCRIPTION3;DEADLINE=13.02.2021 20:10;PRIORITY=2",
@@ -12,8 +13,8 @@ public class Main {
                 "UPDATE;NAME=TASK3;DESCRIPTION=SOME NEW DESCRIPTION;DEADLINE=14.02.2021 20:10;PRIORITY=10",
                 "READ;NAME=TASK1",
                 "READ ALL;",
-                "DELETE;NAME=TASK4",
-                "DELETE ALL;"
+                "DELETE;NAME=TASK4"
+
         );
         CommandBuilder commandBuilder = new CommandBuilder();
         List<Command> commands = stringCommands.stream()
@@ -21,6 +22,7 @@ public class Main {
                 .filter(Optional::isPresent)
                 .map(Optional::get).toList();
 
-        commands.forEach(System.out::println);
+       DatabaseRunner databaseRunner = new DatabaseRunner();
+       commands.forEach(databaseRunner::run);
     }
 }
