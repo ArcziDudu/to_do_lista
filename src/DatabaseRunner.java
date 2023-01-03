@@ -18,7 +18,7 @@ public class DatabaseRunner {
     private final static String SQL_READ_WHERE
             = "SELECT * FROM TODOLIST WHERE NAME = ?;";
     private static final String SQL_READ_ALL
-            = "SELECT * FROM TO DO LIST;";
+            = "SELECT * FROM TODOLIST;";
     private static final String SQL_DELETE
             = "DELETE FROM  TO DO LIST WHERE NAME = ?;";
     private static final String SQL_DELETE_ALL = "DELETE FROM TODOLIST;";
@@ -31,6 +31,7 @@ public class DatabaseRunner {
                 Command.Type.CREATE, this::runAdd,
                 Command.Type.UPDATE, this::runEdit,
                 Command.Type.READ, this::runRead,
+                Command.Type.READ_ALL, this::runReadAll,
                 Command.Type.DELETE_ALL, this::runDeleteAll
         );
     }
@@ -129,7 +130,24 @@ public class DatabaseRunner {
         }
 
     }
+    private void runReadAll(final Command command){
+        if(!Command.Type.READ_ALL.equals(command.getType())){
+            throw new IllegalArgumentException(command.getType().getName());
+        }
+        try(
+                Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+                PreparedStatement statement = connection.prepareStatement(SQL_READ_ALL)
+        ){
+            try(ResultSet resultSet = statement.executeQuery()){
+                List<ToDoItem> readItems = mapToDoItem(resultSet);
+                print(readItems);
+                System.out.printf("run [%s] succesfully, read [%s]%n", command.getType(), readItems.size());
+            }
+        }catch (SQLException e){
+            System.err.printf("[%s] ERROR. Message: [%s]%n",command.getType(), e.getMessage());
+        }
 
+    }
     private List<ToDoItem> mapToDoItem(ResultSet resultSet) throws SQLException {
         List<ToDoItem> result = new ArrayList<>();
         while(resultSet.next()){
